@@ -1,12 +1,17 @@
 module AST where
 
+-- Labels
+type LNo = Int
+
+type Id  = String
+
 -- Specification of the abstract syntax tree
 -- aexp ::= Nat | aexp + aexp | aexp - aexp | Var
 data AExp = ANat Int
           | Plus AExp AExp
           | Minus AExp AExp
           | Mult AExp AExp
-          | Var String
+          | Var Id
           deriving (Show)
 
 -- bexp ::= aexp <= aexp | isZero aexp | bexp or bexp | not bexp
@@ -19,52 +24,39 @@ data BExp = BTrue
           deriving (Show)
 
 -- com ::= skip | while bexp do com | if bexp then com else com | Var := aexp | com ; com
-data Com = Skip
-         | While BExp Com
-         | IfThenElse BExp Com Com
-         | Assign AExp AExp
+data Com = Skip LNo
+         | While BExp Com LNo
+         | IfThenElse BExp Com Com LNo
+         | Assign Id AExp LNo
          | Seq Com Com
           deriving (Show)
 
--- Some Examples
-ex1 :: AExp
-ex1 = ANat 3
 
-ex2 :: AExp
-ex2 = Plus (ANat 3) (ANat 4)
+class Variable a where
+  vars :: a -> [Id]
 
-ex3 :: AExp
-ex3 = Minus (ANat 4) (ANat 3)
 
-ex4 :: AExp
-ex4 = Var "Y"
+instance Variable Com where
+  vars (While ex com _) = vars com ++ vars ex
+  vars (IfThenElse ex com com' _) = vars com ++ vars com' ++ vars ex
+  vars (Assign i ex _) = [i] ++ vars ex
+  vars (Seq com com') = vars com ++ vars com'
+  vars _ = []
 
-ex5 :: BExp
-ex5 = Leq (Var "X") ex3
+instance Variable AExp where
+  vars (Var i) = [i] 
+  vars (Plus ex ex') = vars ex ++ vars ex'
+  vars (Minus ex ex') = vars ex ++ vars ex'
+  vars (Mult ex ex') = vars ex ++ vars ex'
+  vars _ = []
 
-ex6 :: BExp
-ex6 = IsZero ex2
+instance Variable BExp where
+  vars (Leq ex ex') = vars ex ++ vars ex'
+  vars (IsZero ex) = vars ex
+  vars (Or ex ex') = vars ex ++ vars ex'
+  vars (Not ex) = vars ex
+  vars _ = []
 
-ex7 :: BExp
-ex7 = Or ex5 ex6
-
-ex8 :: BExp
-ex8 = Not ex7
-
-ex9 :: Com
-ex9 = Skip
-
-ex10 :: Com
-ex10 = While ex5 ex9
-
-ex11 :: Com
-ex11 = IfThenElse ex8 ex9 ex10
-
-ex12 :: Com
-ex12 = Assign ex4 ex1
-
-ex13 :: Com
-ex13 = Seq ex9 ex10
 
 -- Write a full fledged factorial program
 -- Y := X;
@@ -74,24 +66,39 @@ ex13 = Seq ex9 ex10
 --   Y := Y - 1;
 -- Y := 0
 l1 :: Com
-l1 = Assign (Var "Y") (Var "X")
+l1 = Assign "Y" (Var "X") 1
 
 l2 :: Com
-l2 = Assign (Var "Z" ) (ANat 1)
+l2 = Assign "Z" (ANat 1) 2
 
 l3 :: Com
-l3 = While (Leq (ANat 1) (Var "Y")) (Seq l4 l5)
+l3 = While (Leq (ANat 1) (Var "Y")) (Seq l4 l5) 3
 
 l4 :: Com
-l4 = Assign (Var "Z") (Mult (Var "Z") (Var "Y"))
+l4 = Assign "Z" (Mult (Var "Z") (Var "Y")) 4
 
 l5 :: Com
-l5 = Assign (Var "Y") (Minus (Var "Y") (ANat 1))
+l5 = Assign "Y" (Minus (Var "Y") (ANat 1)) 5
 
 l6 :: Com
-l6 = Assign (Var "Y") (ANat 0)
+l6 = Assign "Y" (ANat 0) 6
 
 
 -- Factorial will be given as an input to the get-model stuff
 factorial :: Com
 factorial = Seq l1 (Seq l2 (Seq l3 l6))
+
+-- Another example using if else
+l1' :: Com
+l1' = Assign "Y" (Var "X") 1
+
+l2' :: Com
+l2' = IfThenElse (Leq (ANat 1) (Var "Z"))
+                 (Assign "Z" (Var "Y") 3)
+                 (Assign "Z" (ANat 10) 4) 2
+
+l3' :: Com
+l3' = Assign "Y" (ANat 0) 5
+
+ite :: Com
+ite = Seq l1' (Seq l2' l3')

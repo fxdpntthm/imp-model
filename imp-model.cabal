@@ -49,7 +49,7 @@ extra-source-files:  CHANGELOG.md
 library
   -- Modules exported by the library.
   exposed-modules: AST
-                 , Temp
+                 , Model
 
   -- Modules included in this library but not exported.
   -- other-modules:
@@ -62,7 +62,7 @@ library
 
   -- Other library packages from which modules are imported.
   build-depends:       base ^>=4.12.0.0
-                     , z3 ^>= 4.3.1
+                     , z3 ^>= 4.8.0
                      , containers ^>= 0.6.0.1
                      , transformers >= 0.5
 
@@ -75,10 +75,11 @@ library
 
 executable imp-model
   -- .hs or .lhs file containing the Main module.
-  main-is:             GetModel.hs
+  main-is:             Example.hs
 
   -- Modules included in this executable, other than Main.
   other-modules: AST
+               , Model
 
   -- LANGUAGE extensions used by modules in this package.
     -- other-extensions: TemplateHaskell
@@ -88,7 +89,7 @@ executable imp-model
 
   -- Other library packages from which modules are imported.
   build-depends:       base ^>=4.12.0.0
-                     , z3 ^>= 4.3.1
+                     , z3 ^>= 4.8.0
                      , containers ^>= 0.6.0.1
                      , transformers >= 0.5
   -- Directories containing source files.
