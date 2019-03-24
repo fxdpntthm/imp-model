@@ -1,0 +1,2 @@
+WHILE (X <= 0) DO (X := X + 1);
+SKIP

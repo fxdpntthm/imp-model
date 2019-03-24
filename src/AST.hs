@@ -3,7 +3,7 @@ module AST where
 -- Labels
 type LNo = Int
 
-type Id  = String
+type Id = String 
 
 -- Specification of the abstract syntax tree
 -- aexp ::= Nat | aexp + aexp | aexp - aexp | Var
@@ -12,16 +12,17 @@ data AExp = ANat Int
           | Minus AExp AExp
           | Mult AExp AExp
           | Var Id
-          deriving (Show)
+          deriving (Show, Eq)
 
 -- bexp ::= aexp <= aexp | isZero aexp | bexp or bexp | not bexp
 data BExp = BTrue
           | BFalse
-          | Leq AExp AExp
           | IsZero AExp
+          | Leq AExp AExp
           | Or BExp BExp
+          | And BExp BExp
           | Not BExp
-          deriving (Show)
+          deriving (Show, Eq)
 
 -- com ::= skip | while bexp do com | if bexp then com else com | Var := aexp | com ; com
 data Com = Skip LNo
@@ -29,7 +30,7 @@ data Com = Skip LNo
          | IfThenElse BExp Com Com LNo
          | Assign Id AExp LNo
          | Seq Com Com
-          deriving (Show)
+          deriving (Show, Eq)
 
 
 class Variable a where
@@ -89,6 +90,11 @@ factorial :: Com
 factorial = Seq l1 (Seq l2 (Seq l3 l6))
 
 -- Another example using if else
+{-
+Y := X;
+IF (1 <= Z) THEN (Z := Y) ELSE (Z := 10);
+Y := 0;
+-}
 l1' :: Com
 l1' = Assign "Y" (Var "X") 1
 
@@ -102,3 +108,13 @@ l3' = Assign "Y" (ANat 0) 5
 
 ite :: Com
 ite = Seq l1' (Seq l2' l3')
+
+
+-- One more example
+{-
+WHILE (X <= 0) DO (X := X + 1);
+SKIP
+-}
+unsatEx :: Com
+unsatEx = Seq (While (Leq (Var "X") (ANat 0))
+                (Assign "X" (Plus (Var "X") (ANat 1)) 2) 1) (Skip 3)

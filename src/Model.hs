@@ -2,13 +2,13 @@ module Model where
 
 import           Data.List (nub)
 
-import           AST ( Id
-                     , LNo
-                     , AExp (ANat, Plus, Minus, Mult, Var)
-                     , BExp (BTrue, BFalse, Leq, IsZero, Or, Not)
-                     , Com (Skip, While, IfThenElse, Assign, Seq)
-                     , vars
-                     , factorial )
+import           AST -- ( Id
+                     -- , LNo
+                     -- , AExp (ANat, Plus, Minus, Mult, Var)
+                     -- , BExp (BTrue, BFalse, Leq, IsZero, Or, Not)
+                     -- , Com (Skip, While, IfThenElse, Assign, Seq)
+                     -- , vars
+                     -- , factorial )
 
 
 -- | converts a list of ids to spaced strings
@@ -28,15 +28,15 @@ generateComment comment = ";; " ++ comment ++ "\n"
 
 findLastLabel :: Com -> Int
 findLastLabel (Skip lno) = lno
-findLastLabel (While _ com lno) = findLastLabel com
-findLastLabel (IfThenElse _ com1 com2 lno) = lno
+findLastLabel (While _ com _) = findLastLabel com
+findLastLabel (IfThenElse _ _ _ lno) = lno
 findLastLabel (Assign _ _ lno) = lno
 findLastLabel (Seq _ com) = findLastLabel com
 
 findFirstLabel :: Com -> Int
 findFirstLabel (Skip lno) = lno
-findFirstLabel (While _ com lno) = lno 
-findFirstLabel (IfThenElse _ com1 com2 lno) = lno
+findFirstLabel (While _ _ lno) = lno 
+findFirstLabel (IfThenElse _ _ _ lno) = lno
 findFirstLabel (Assign _ _ lno) = lno
 findFirstLabel (Seq com _) = findFirstLabel com
 
@@ -47,13 +47,13 @@ generateAssertions :: PStage -> Com  -> Com -> String
 
 generateAssertions Entry (Assign _ _ 1) _ = "" 
 generateAssertions Entry (Skip 1) _ = "" 
-generateAssertions Entry (While _ com 1) _ = "" 
+generateAssertions Entry (While _ _ 1) _ = "" 
 generateAssertions Entry (IfThenElse _ _ _ 1) _ = "" 
 
 
 -- for skip the entry is exit of previous
 generateAssertions Entry c@(Skip lno) c' =
-  generateComment "entry for "
+  generateComment "Entry for "
   ++ generateComment (show c)
   ++ generateComment "is exit of prev com"
   ++ "(assert (forall ((v VAR) (l LAB)) (= (en n"
@@ -62,7 +62,7 @@ generateAssertions Entry c@(Skip lno) c' =
 
 -- Assignment entry is same as previous exit
 generateAssertions Entry c@(Assign _ _ lno) c' =
-  generateComment "entry for "
+  generateComment "Entry for "
   ++ generateComment (show c)
   ++ generateComment "is exit of previous label"
   ++ "(assert (forall ((v VAR) (l LAB)) (= (en n"
@@ -70,7 +70,7 @@ generateAssertions Entry c@(Assign _ _ lno) c' =
 
 -- for While entry is union of previous exit and exit of last com (need to inspect com)
 generateAssertions Entry c@(While _ com lno) c' =
-  generateComment "entry for "
+  generateComment "Entry for "
   ++ generateComment (show c)
   ++ generateComment "is union of exit of previous line no and exit of last command"
   ++ "(assert (forall ((v VAR) (l LAB))"
@@ -83,7 +83,7 @@ generateAssertions Entry c@(While _ com lno) c' =
 
 -- for If entry is same as exit
 generateAssertions Entry c@(IfThenElse _ com1 com2 lno) c' =
-  generateComment "entry for "
+  generateComment "Entry for "
   ++ generateComment (show c)
   ++ generateComment "is same as exit of previous line"
   ++ "(assert (forall ((v VAR) (l LAB)) (= (en n"
@@ -104,7 +104,9 @@ generateAssertions Entry (Seq com1 com2) c' =
 
 -- Exit of skip is same as entry of skip
 generateAssertions Exit c@(Skip lno) _ =
-  generateComment (show c) ++ " does nothing"
+  generateComment "Exit for"
+  ++ generateComment (show c)
+  ++ generateComment" does nothing"
   ++ "(assert (forall ((v VAR) (l LAB)) (= (ex n" ++ show lno ++ " v l) (en n" ++ show lno ++" v l))))\n\n"
 
 -- Exit of while is same as entry of while
