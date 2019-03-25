@@ -17,3 +17,7 @@ There are 2 other files `unsat.imp` and `ite.imp` for sample testing.
 - `cabal new-test`
 
 This will run some sanity tests on the parser and AST generation
+
+TODO:
+
+- [] Try using sbv or haskell-z3 to generate a model by using z3 haskell bindings rather than z3 file
