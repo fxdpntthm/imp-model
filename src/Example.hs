@@ -2,7 +2,6 @@ module Main where
 
 import System.IO
 import Parser (imp, emptyState)
-import AST (factorial, ite, unsatEx)
 import Model (generateModel)
 import Text.Parsec
 
@@ -16,13 +15,11 @@ main :: IO ()
 main = do file <- readFile "examples/factorial.imp"
           case (runParser imp emptyState "examples/factorial.imp" file) of
             Left err -> putStrLn $ show err
-            Right ast -> do writeFile "examples/factorial.rs" (generateModel ast)
-                            putStrLn $ show (factorial == ast)
+            Right ast -> writeFile "examples/factorial.rs" (generateModel ast)
           file <- readFile "examples/ite.imp"
           case (runParser imp emptyState "examples/ite.imp" file) of
             Left err -> putStrLn $ show err
-            Right ast -> do writeFile "examples/ite.rs" (generateModel ast)
-                            putStrLn $ show (ite == ast)
+            Right ast -> writeFile "examples/ite.rs" (generateModel ast)
                             
            
           

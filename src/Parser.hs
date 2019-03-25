@@ -18,8 +18,7 @@ import           AST ( Id
                      , LNo
                      , AExp (ANat, Plus, Minus, Mult, Var)
                      , BExp (BTrue, BFalse, Leq, IsZero, Or, Not, And)
-                     , Com (Skip, While, IfThenElse, Assign, Seq)
-                     , factorial )
+                     , Com (Skip, While, IfThenElse, Assign, Seq) )
 
 
 emptyState :: Int
