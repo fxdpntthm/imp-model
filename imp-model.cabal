@@ -101,7 +101,8 @@ executable imp-model
                      , containers ^>= 0.6.0.1
                      , transformers ^>= 0.5
                      , parsec ^>= 3.1.13.0
-                      
+                     , filepath ^>= 1.4.2.1
+                     , directory ^>= 1.3.3.2
   -- Directories containing source files.
   hs-source-dirs:      src
 
@@ -128,9 +129,6 @@ test-suite parser-test
                , hspec ^>= 2.7.0
 
   other-modules: ParserSpec
-
-  -- data-dirs: examples
-
-  -- build-tool-depends:   hspec-discover: hspec-discover >= 2.7.0
+ 
+  build-tools:      hspec-discover >= 2.7.0
   default-language: Haskell2010
-  
