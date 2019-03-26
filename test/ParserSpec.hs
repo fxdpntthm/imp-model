@@ -22,7 +22,7 @@ l2 :: Com
 l2 = Assign "Z" (ANat 1) 2
 
 l3 :: Com
-l3 = While (Leq (ANat 1) (Var "Y")) (Seq l4 l5) 3
+l3 = While (RBinary Leq (ANat 1) (Var "Y")) (Seq l4 l5) 3
 
 l4 :: Com
 l4 = Assign "Z" (Mult (Var "Z") (Var "Y")) 4
@@ -48,7 +48,7 @@ l1' :: Com
 l1' = Assign "Y" (Var "X") 1
 
 l2' :: Com
-l2' = IfThenElse (Leq (ANat 1) (Var "Z"))
+l2' = IfThenElse (RBinary Leq (ANat 1) (Var "Z"))
                  (Assign "Z" (Var "Y") 3)
                  (Assign "Z" (ANat 10) 4) 2
 
@@ -65,7 +65,7 @@ WHILE (X <= 0) DO (X := X + 1);
 SKIP
 -}
 unsatAst :: Com
-unsatAst = Seq (While (Leq (Var "X") (ANat 0))
+unsatAst = Seq (While (RBinary Leq (Var "X") (ANat 0))
                 (Assign "X" (Plus (Var "X") (ANat 1)) 2) 1) (Skip 3)
 
 spec :: Spec

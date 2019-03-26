@@ -1,0 +1,5 @@
+SKIP;
+IF X <= 3 THEN (IF Y <= 4 THEN Z:=X+Y
+                          ELSE SKIP)
+          ELSE (IF Y <= 4 THEN Z:=X*Y
+                          ELSE Z:=1)

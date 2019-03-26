@@ -14,15 +14,18 @@ data AExp = ANat Int
           | Var Id
           deriving (Show, Eq)
 
--- bexp ::= aexp <= aexp | isZero aexp | bexp or bexp | not bexp
+-- bexp ::= aexp <= aexp | aexp = aexp | isZero aexp | bexp or bexp | not bexp
 data BExp = BTrue
           | BFalse
           | IsZero AExp
-          | Leq AExp AExp
+          | RBinary Op AExp AExp
           | Or BExp BExp
           | And BExp BExp
           | Not BExp
           deriving (Show, Eq)
+
+data Op = Leq | Eq
+  deriving (Show, Eq)  
 
 -- com ::= skip | while bexp do com | if bexp then com else com | Var := aexp | com ; com
 data Com = Skip LNo
@@ -31,6 +34,7 @@ data Com = Skip LNo
          | Assign Id AExp LNo
          | Seq Com Com
           deriving (Show, Eq)
+
 class Variable a where
   vars :: a -> [Id]
 
@@ -50,7 +54,7 @@ instance Variable AExp where
   vars _ = []
 
 instance Variable BExp where
-  vars (Leq ex ex') = vars ex ++ vars ex'
+  vars (RBinary _ ex ex') = vars ex ++ vars ex'
   vars (IsZero ex) = vars ex
   vars (Or ex ex') = vars ex ++ vars ex'
   vars (Not ex) = vars ex

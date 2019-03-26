@@ -28,9 +28,9 @@ generateComment comment = ";; " ++ comment ++ "\n"
 
 findLastLabel :: Com -> Int
 findLastLabel (Skip lno) = lno
-findLastLabel (While _ com _) = findLastLabel com
-findLastLabel (IfThenElse _ _ _ lno) = lno
 findLastLabel (Assign _ _ lno) = lno
+findLastLabel (While _ com _) = findLastLabel com
+findLastLabel (IfThenElse _ _ com _) = findLastLabel com
 findLastLabel (Seq _ com) = findLastLabel com
 
 findFirstLabel :: Com -> Int
@@ -124,8 +124,14 @@ generateAssertions Exit c@(IfThenElse _ com com' lno) _ =
   ++ "(assert (forall ((v VAR) (l LAB))"
   ++ "(= (or (ex n" ++ show lno1' ++ " v l) (ex n" ++ show lno2' ++ " v l))"
   ++ "(ex n" ++ show lno ++ " v l))))\n\n"
-  where lno1' = findLastLabel com
-        lno2' = findLastLabel com'
+  where lno1' = findExLabel com
+        lno2' = findExLabel com'
+        findExLabel :: Com -> Int
+        findExLabel (Skip l) = l
+        findExLabel (Assign _ _ l) = l
+        findExLabel (While _ _ l) = l
+        findExLabel (IfThenElse _ _ _ l) = l
+        findExLabel (Seq _ co) = findLastLabel co
 
 -- For assignment, remove all previous lables and add the current label
 generateAssertions Exit c@(Assign i _ lno) _ =
@@ -158,7 +164,7 @@ generatePrefixDecls ids no =
   ++ "\n\n" ++ generateComment "Assertions about the states"
   ++ generateComment "Entry state for n1 is all hooks"
   ++ "(assert (forall ((v VAR) (l LAB)) (ite (= l l?) (en n1 v l) (not (en n1 v l)))))\n\n"
-  ++ generateComment "entry and exit for next follows"
+  ++ generateComment "entry and exit for next follows\n"
 
 
 getModel :: String
@@ -167,6 +173,7 @@ getModel = generateComment "check for satisfiability and generate model"
 
 generateModel :: Com -> String
 generateModel program =
-  generatePrefixDecls (nub $ vars program) (findLastLabel program)
+  generateComment (show program) 
+  ++ generatePrefixDecls (nub $ vars program) (findLastLabel program)
   ++ generateAssertions Entry program program ++ "\n"
   ++ getModel

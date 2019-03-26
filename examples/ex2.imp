@@ -1,0 +1,6 @@
+Y := X ;
+Z := Y ;
+WHILE Y <= 10 DO
+  (WHILE Z <= 10 DO (X := X+Z; Z := Z+1);
+  Y := Y+1);
+SKIP

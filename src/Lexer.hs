@@ -21,7 +21,7 @@ langDef = T.LanguageDef {
             , T.opLetter      = oneOf ":*+<=-"
             , T.reservedNames = ["WHILE", "DO",  "IF", "THEN", "ELSE"
                                 , "SKIP", "TRUE", "FALSE"]
-            , T.reservedOpNames  = [":=", "+", "*", "-", "<=", "||", "&&"]}
+            , T.reservedOpNames  = [":=", "+", "*", "-", "<=", "||", "&&", "="]}
 
 lexer :: T.GenTokenParser String Int Identity
 lexer = T.makeTokenParser langDef
@@ -37,7 +37,7 @@ whiteSpace     = T.whiteSpace lexer
 semi           = T.semi lexer
 parens         = T.parens lexer
 semiSep        = T.semiSep lexer
-sepiSep1       = T.semiSep1 lexer
+semiSep1       = T.semiSep1 lexer
 commaSep       = T.commaSep lexer
 commaSep1      = T.commaSep1 lexer
 

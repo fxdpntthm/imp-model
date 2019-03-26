@@ -6,18 +6,20 @@ import Data.Either (partitionEithers)
 import Data.List (partition)
 import qualified Data.Map as Map
 import Data.Maybe (isJust, fromMaybe)
-import Text.Parsec
-import Text.ParserCombinators.Parsec
-import Text.ParserCombinators.Parsec.Expr
-import Text.ParserCombinators.Parsec.Language
-import Lexer
+import Text.Parsec (modifyState, getState)
+import Text.ParserCombinators.Parsec (choice, (<?>), (<|>), sepBy1)
+import Text.ParserCombinators.Parsec.Expr (buildExpressionParser, Operator (Infix, Prefix), Assoc (AssocLeft))
+-- import Text.ParserCombinators.Parsec.Language(Infix, AssocLeft)
 
 
-
+import Lexer (ParseM, reserved, identifier
+             , natural, semi, whiteSpace
+             , reservedOp, parens, semiSep, semiSep1)
 import           AST ( Id
                      , LNo
                      , AExp (ANat, Plus, Minus, Mult, Var)
-                     , BExp (BTrue, BFalse, Leq, IsZero, Or, Not, And)
+                     , Op (Eq, Leq)
+                     , BExp (BTrue, BFalse, RBinary, IsZero, Or, Not, And)
                      , Com (Skip, While, IfThenElse, Assign, Seq) )
 
 
@@ -62,9 +64,12 @@ boolTerm = parens boolExp
 
 rExp :: ParseM BExp 
 rExp = do a1 <- arithTerm
-          reservedOp "<="
+          op <- relation
           a2 <- arithTerm
-          return $ Leq a1 a2
+          return $ RBinary op a1 a2
+
+relation :: ParseM Op
+relation = (reservedOp "<=" >> return Leq) <|> (reservedOp "=" >> return Eq) <?> "relation operator" 
 
 boolExp :: ParseM BExp
 boolExp = buildExpressionParser bOperators boolTerm

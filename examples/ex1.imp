@@ -1,0 +1,3 @@
+X := 1;
+IF (X = 3) THEN (X := 1; Y := 4) ELSE (X := 0)
+SKIP
